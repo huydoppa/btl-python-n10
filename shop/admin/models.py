@@ -8,6 +8,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(180),unique=False, nullable=False)
     profile = db.Column(db.String(180), unique=False, nullable=False,default='profile.jpg')
+    role = db.Column(db.String(180),unique=False)
 
     def __repr__(self):
         return '<User %r>' % self.username

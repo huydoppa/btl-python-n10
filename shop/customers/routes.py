@@ -56,6 +56,7 @@ def customerLogin():
         user = Register.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
+            session['email']=form.email.data
             flash('You are login now!', 'success')
             next = request.args.get('next')
             return redirect(next or url_for('home'))
@@ -76,6 +77,35 @@ def updateshoppingcart():
         del shopping['image']
         del shopping['colors']
     return updateshoppingcart
+
+@app.route('/customer/profile',methods=['GET','POST'])
+def customer_profile():
+    email = session.get('email')
+    if request.method == 'POST':
+        user = Register.query.filter_by(email=email).first_or_404()
+        user.name = request.form.get('name')
+        user.address = request.form.get('address')
+        user.country = request.form.get('country')
+        user.zipcode = request.form.get('zipcode')
+        user.mobile = request.form.get('mobile')
+        if request.files.get('fileupload') :
+            profile = photos.save(request.files.get('fileupload'), name=secrets.token_hex(10) + ".")
+            user.profile = profile
+        db.session.commit()
+    if email:
+        user=Register.query.filter_by(email=email).first_or_404()
+        username = user.username
+        name = user.name
+        address = user.city
+        country = user.country
+        zipcode = user.zipcode
+        mobile = user.contact
+        profile = user.profile
+        print(profile)
+        return render_template('customer/profile.html',username=username,name=name,address=address,country=country,zipcode=zipcode,mobile=mobile,profile=profile)
+            
+    else:
+        return redirect(url_for('customerLogin'))
 
 @app.route('/getorder')
 @login_required
